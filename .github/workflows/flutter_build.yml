@@ -1,87 +1,25 @@
-name: Build Android APK
+name: Simple APK Build
 
-on:
-  push:
-    branches: [ main ]
+on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Set up Flutter
-      uses: subosito/flutter-action@v2
+    - uses: actions/checkout@v4
+    
+    - uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.22.0'
-
-    - name: Create and Setup Project
-      run: |
-        # نیا پروجیکٹ بنائیں
-        flutter create --org com.shoaib shoaib_app
-        cd shoaib_app
         
-        # ضروری ڈیپنڈنسیز شامل کریں
-        echo '
-        dependencies:
-          flutter:
-            sdk: flutter
-          http: ^1.1.0
-          shared_preferences: ^2.2.2
-          url_launcher: ^6.1.11
-        ' >> pubspec.yaml
-
-        # main.dart فائل بنائیں
-        cat > lib/main.dart << 'EOF'
-        import 'package:flutter/material.dart';
-
-        void main() {
-          runApp(MyApp());
-        }
-
-        class MyApp extends StatelessWidget {
-          @override
-          Widget build(BuildContext context) {
-            return MaterialApp(
-              title: 'شعیب علمی اسلامی ایپ',
-              theme: ThemeData(
-                primarySwatch: Colors.green,
-              ),
-              home: Scaffold(
-                appBar: AppBar(
-                  title: Text('شعیب علمی اسلامی ایپ'),
-                ),
-                body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.mosque, size: 80, color: Colors.green),
-                      SizedBox(height: 20),
-                      Text(
-                        'شعیب علمی اسلامی ایپ',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(height: 10),
-                      Text(
-                        'جلد ہی مکمل ایپ دستیاب ہوگی',
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }
-        }
-        EOF
-
-        # APK بنائیں
+    - name: Create Simple App and Build
+      run: |
+        flutter create --org com.shoaib simple_app
+        cd simple_app
         flutter build apk --release
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
+        
+    - uses: actions/upload-artifact@v4
       with:
-        name: shoaib-islamic-app
-        path: shoaib_app/build/app/outputs/flutter-apk/app-release.apk
+        name: simple-app-apk
+        path: simple_app/build/app/outputs/flutter-apk/app-release.apk
