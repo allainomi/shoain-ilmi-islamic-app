@@ -3,8 +3,6 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
@@ -14,41 +12,76 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
     - name: Set up Flutter
       uses: subosito/flutter-action@v2
       with:
         flutter-version: '3.22.0'
 
-    - name: Create New Flutter Project
+    - name: Create and Setup Project
       run: |
-        # موجودہ فائلوں کو backup کریں
-        mkdir backup
-        cp -r lib backup/
-        cp -r assets backup/
-        cp pubspec.yaml backup/
+        # نیا پروجیکٹ بنائیں
+        flutter create --org com.shoaib shoaib_app
+        cd shoaib_app
         
-        # نیا Flutter پروجیکٹ بنائیں
-        flutter create --org com.shoaib ilmi_islamic_app .
-        
-        # پرانی فائلیں واپس کاپی کریں
-        cp -r backup/lib/* lib/
-        cp -r backup/assets/* assets/
-        cp backup/pubspec.yaml ./pubspec.yaml
+        # ضروری ڈیپنڈنسیز شامل کریں
+        echo '
+        dependencies:
+          flutter:
+            sdk: flutter
+          http: ^1.1.0
+          shared_preferences: ^2.2.2
+          url_launcher: ^6.1.11
+        ' >> pubspec.yaml
 
-    - name: Install Dependencies
-      run: flutter pub get
+        # main.dart فائل بنائیں
+        cat > lib/main.dart << 'EOF'
+        import 'package:flutter/material.dart';
 
-    - name: Build APK
-      run: flutter build apk --release
+        void main() {
+          runApp(MyApp());
+        }
+
+        class MyApp extends StatelessWidget {
+          @override
+          Widget build(BuildContext context) {
+            return MaterialApp(
+              title: 'شعیب علمی اسلامی ایپ',
+              theme: ThemeData(
+                primarySwatch: Colors.green,
+              ),
+              home: Scaffold(
+                appBar: AppBar(
+                  title: Text('شعیب علمی اسلامی ایپ'),
+                ),
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.mosque, size: 80, color: Colors.green),
+                      SizedBox(height: 20),
+                      Text(
+                        'شعیب علمی اسلامی ایپ',
+                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'جلد ہی مکمل ایپ دستیاب ہوگی',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+        }
+        EOF
+
+        # APK بنائیں
+        flutter build apk --release
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: shoaib-ilmi-app
-        path: build/app/outputs/flutter-apk/app-release.apk
+        name: shoaib-islamic-app
+        path: shoaib_app/build/app/outputs/flutter-apk/app-release.apk
