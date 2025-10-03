@@ -25,79 +25,30 @@ jobs:
       with:
         flutter-version: '3.22.0'
 
-    - name: Create Android Directory Structure
+    - name: Create New Flutter Project
       run: |
-        mkdir -p android/app/src/main
-        mkdir -p android/app/src/main/res/values
+        # موجودہ فائلوں کو backup کریں
+        mkdir backup
+        cp -r lib backup/
+        cp -r assets backup/
+        cp pubspec.yaml backup/
+        
+        # نیا Flutter پروجیکٹ بنائیں
+        flutter create --org com.shoaib ilmi_islamic_app .
+        
+        # پرانی فائلیں واپس کاپی کریں
+        cp -r backup/lib/* lib/
+        cp -r backup/assets/* assets/
+        cp backup/pubspec.yaml ./pubspec.yaml
 
-    - name: Create AndroidManifest.xml
-      run: |
-        cat > android/app/src/main/AndroidManifest.xml << 'EOF'
-        <?xml version="1.0" encoding="utf-8"?>
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-            package="com.example.shoaib_ilmi_islamic_app">
-
-            <uses-permission android:name="android.permission.INTERNET" />
-            <uses-permission android:name="android.permission.WAKE_LOCK" />
-            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-
-            <application
-                android:label="شعیب علمی اسلامی ایپ"
-                android:name="${applicationName}"
-                android:icon="@mipmap/ic_launcher"
-                android:roundIcon="@mipmap/ic_launcher_round"
-                android:allowBackup="true"
-                android:theme="@style/LaunchTheme"
-                android:usesCleartextTraffic="true">
-
-                <activity
-                    android:name=".MainActivity"
-                    android:exported="true"
-                    android:launchMode="singleTop"
-                    android:theme="@style/LaunchTheme"
-                    android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
-                    android:hardwareAccelerated="true"
-                    android:windowSoftInputMode="adjustResize">
-                    
-                    <meta-data
-                        android:name="io.flutter.embedding.android.NormalTheme"
-                        android:resource="@style/NormalTheme" />
-                        
-                    <meta-data
-                        android:name="io.flutter.embedding.android.SplashScreenDrawable"
-                        android:resource="@drawable/launch_background" />
-                        
-                    <intent-filter>
-                        <action android:name="android.intent.action.MAIN" />
-                        <category android:name="android.intent.category.LAUNCHER" />
-                    </intent-filter>
-                </activity>
-
-                <meta-data
-                    android:name="flutterEmbedding"
-                    android:value="2" />
-                    
-            </application>
-        </manifest>
-        EOF
-
-    - name: Create strings.xml
-      run: |
-        cat > android/app/src/main/res/values/strings.xml << 'EOF'
-        <?xml version="1.0" encoding="utf-8"?>
-        <resources>
-            <string name="app_name">شعیب علمی اسلامی ایپ</string>
-        </resources>
-        EOF
-
-    - name: Install dependencies
+    - name: Install Dependencies
       run: flutter pub get
 
     - name: Build APK
       run: flutter build apk --release
 
-    - name: Upload APK artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: shoaib-ilmi-islamic-app
+        name: shoaib-ilmi-app
         path: build/app/outputs/flutter-apk/app-release.apk
